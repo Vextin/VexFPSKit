@@ -65,6 +65,14 @@ public class @Controls : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": ""Hold""
+                },
+                {
+                    ""name"": ""MouseDelta"",
+                    ""type"": ""Value"",
+                    ""id"": ""75caf092-b3cc-4f53-9c19-84eb28d33b70"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -177,6 +185,17 @@ public class @Controls : IInputActionCollection, IDisposable
                     ""action"": ""Walk"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a4f5aa8d-2c7b-4d5c-b3ee-62c435eb13da"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MouseDelta"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -208,6 +227,7 @@ public class @Controls : IInputActionCollection, IDisposable
         m_Gameplay_Prone = m_Gameplay.FindAction("Prone", throwIfNotFound: true);
         m_Gameplay_Sprint = m_Gameplay.FindAction("Sprint", throwIfNotFound: true);
         m_Gameplay_Walk = m_Gameplay.FindAction("Walk", throwIfNotFound: true);
+        m_Gameplay_MouseDelta = m_Gameplay.FindAction("MouseDelta", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -263,6 +283,7 @@ public class @Controls : IInputActionCollection, IDisposable
     private readonly InputAction m_Gameplay_Prone;
     private readonly InputAction m_Gameplay_Sprint;
     private readonly InputAction m_Gameplay_Walk;
+    private readonly InputAction m_Gameplay_MouseDelta;
     public struct GameplayActions
     {
         private @Controls m_Wrapper;
@@ -273,6 +294,7 @@ public class @Controls : IInputActionCollection, IDisposable
         public InputAction @Prone => m_Wrapper.m_Gameplay_Prone;
         public InputAction @Sprint => m_Wrapper.m_Gameplay_Sprint;
         public InputAction @Walk => m_Wrapper.m_Gameplay_Walk;
+        public InputAction @MouseDelta => m_Wrapper.m_Gameplay_MouseDelta;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -300,6 +322,9 @@ public class @Controls : IInputActionCollection, IDisposable
                 @Walk.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnWalk;
                 @Walk.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnWalk;
                 @Walk.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnWalk;
+                @MouseDelta.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnMouseDelta;
+                @MouseDelta.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnMouseDelta;
+                @MouseDelta.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnMouseDelta;
             }
             m_Wrapper.m_GameplayActionsCallbackInterface = instance;
             if (instance != null)
@@ -322,6 +347,9 @@ public class @Controls : IInputActionCollection, IDisposable
                 @Walk.started += instance.OnWalk;
                 @Walk.performed += instance.OnWalk;
                 @Walk.canceled += instance.OnWalk;
+                @MouseDelta.started += instance.OnMouseDelta;
+                @MouseDelta.performed += instance.OnMouseDelta;
+                @MouseDelta.canceled += instance.OnMouseDelta;
             }
         }
     }
@@ -343,5 +371,6 @@ public class @Controls : IInputActionCollection, IDisposable
         void OnProne(InputAction.CallbackContext context);
         void OnSprint(InputAction.CallbackContext context);
         void OnWalk(InputAction.CallbackContext context);
+        void OnMouseDelta(InputAction.CallbackContext context);
     }
 }
