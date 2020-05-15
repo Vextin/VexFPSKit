@@ -13,7 +13,7 @@ public class FPSMovement : MonoBehaviour
         Arcade = 0
     }
     [SerializeField] [Tooltip("What style of movement should the controller use? Arcade, milsim, etc.")]
-    MovementStyle movementStyle;
+    MovementStyle movementStyle = 0;
 
     delegate void MoveDelegate();
 
@@ -31,32 +31,59 @@ public class FPSMovement : MonoBehaviour
     [Header("Speed")]
 
     [SerializeField]
+    [Range(.5f, 15f)]
     [Tooltip("Walking speed of the player's movement in meters per second. Humans are naturally around 1.4m/s")]
-    float walkSpeed;
+    float walkSpeed = 1.4f;
 
     [SerializeField]
+    [Range(.5f, 15f)]
     [Tooltip("Prone crawling speed of the player's movement in meters per second.")]
-    float proneSpeed;
+    float proneSpeed = 1f;
 
     [SerializeField]
+    [Range(.5f, 15f)]
     [Tooltip("Crouch-walking speed of the player's movement in meters per second.")]
-    float crouchSpeed;
+    float crouchSpeed = 1.4f;
 
     [SerializeField]
+    [Range(.5f, 15f)]
     [Tooltip("Base speed of the player's movement in meters per second. A defualt of around 7 is nice.")]
-    float jogSpeed;
+    float jogSpeed = 7f;
 
     [SerializeField]
+    [Range(.5f, 15f)]
     [Tooltip("Base walking speed of the player's movement in meters per second. Humans can reach around 12m/s")]
-    float sprintSpeed;
+    float sprintSpeed = 12f;
 
     float currentSpeed;
     #endregion
 
-    #region player state
+    #region heights
+    [Space] [Header("Heights")]
     [SerializeField]
-    bool toggleSprint, toggleProne, toggleWalk, toggleCrouch;
-    bool isCrouching, isProne, isGrounded, isWalking, isSprinting;
+    [Range(.75f, 2f)]
+    float normalHeight = 2f;
+    [SerializeField]
+    [Range(.75f, 2f)]
+    float crouchHeight = 1.5f;
+    [SerializeField]
+    [Range(.75f, 2f)]
+    float proneHeight = .75f;
+    #endregion
+
+    GameObject cam;
+
+    #region player state
+    [Space][Header("Control options")]
+    [SerializeField]
+    bool toggleSprint = false;
+    [SerializeField]
+    bool toggleProne = true;
+    [SerializeField]
+    bool toggleWalk = false;
+    [SerializeField]
+    bool toggleCrouch = false;
+    bool isCrouching = false, isProne = false, isGrounded = true, isWalking = false, isSprinting = false;
     #endregion
 
     private void Awake()
@@ -73,6 +100,8 @@ public class FPSMovement : MonoBehaviour
         ConfigureControlsDelegates();
 
         cc = GetComponent<CharacterController>();
+
+        cam = Camera.main.gameObject;
     }
 
     void ConfigureControlsDelegates()
@@ -102,29 +131,62 @@ public class FPSMovement : MonoBehaviour
     {
         ResetPlayerStates();
         isCrouching = set;
+
+        if (isCrouching)
+        {
+            cc.height = crouchHeight;
+            cc.center = new Vector3(0, (crouchHeight-2)*0.5f, 0);
+        }
+        else
+        {
+            cc.height = normalHeight;
+            cc.center = Vector3.zero;
+        }
     }
     void SetProne(bool set)
     {
         ResetPlayerStates();
         isProne = set;
+        if (isProne)
+        {
+            cc.height = proneHeight;
+            cc.center = new Vector3(0, (proneHeight - 2) * 0.5f, 0);
+        }
+        else
+        {
+            cc.height = normalHeight;
+            cc.center = Vector3.zero;
+        }
     }    
     void SetSprint(bool set)
     {
         ResetPlayerStates();
         isSprinting = set;
+        if (isSprinting)
+        {
+            cc.height = normalHeight;
+            cc.center = Vector3.zero;
+        }
     }
     void SetWalk(bool set)
     {
         ResetPlayerStates();
         isWalking = set;
+        if (isWalking)
+        {
+            cc.height = normalHeight;
+            cc.center = Vector3.zero;
+        }
     }
 
     void ResetPlayerStates()
     {
         isCrouching = false;
-        isWalking = false;
-        isProne = false;
         isSprinting = false;
+        isProne = false;
+        isWalking = false;
+        cc.center = Vector3.zero;
+        cc.height = normalHeight;
     }
 
     void UpdateSpeed()
@@ -152,9 +214,15 @@ public class FPSMovement : MonoBehaviour
         }
     }
 
+    void UpdateCameraHeight()
+    {
+        cam.transform.localPosition = new Vector3(0, cc.height-1, 0);
+    }
+
     void MoveArcade()
     {
         UpdateSpeed();
+        UpdateCameraHeight();
 
         //Read the movement from the InputSystem
         Vector2 moveInput = ctrl.Gameplay.Move.ReadValue<Vector2>();
