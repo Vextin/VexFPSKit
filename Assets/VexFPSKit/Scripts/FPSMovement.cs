@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-
+[RequireComponent(typeof(CharacterController))]
 public class FPSMovement : MonoBehaviour
 {
     #region Run the right code depending on the user's movement mode choice. 
@@ -156,17 +156,26 @@ public class FPSMovement : MonoBehaviour
     {
         UpdateSpeed();
 
+        //Read the movement from the InputSystem
         Vector2 moveInput = ctrl.Gameplay.Move.ReadValue<Vector2>();
+
+        //New movement vector for this frame's movement.
         Vector3 movement = new Vector3();
 
+        //Set the axes to the right values from the input.
         movement.x = moveInput.x;
-        
         movement.z = moveInput.y;
 
+        //Framerate independence & multiply by speed.
         movement *= currentSpeed * Time.deltaTime;
 
-        movement.y = Physics.gravity.y;
+        //Transform to worldspace so the player moves in the CAMERA'S direction, not world forward.
+        movement = transform.TransformVector(movement);
 
+        //Add gravity.
+        movement.y = Physics.gravity.y * Time.deltaTime;
+
+        //Tell the CharacterController component to move.
         cc.Move(movement);
     }
 }
